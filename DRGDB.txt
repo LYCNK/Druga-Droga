@@ -1,0 +1,89 @@
+// Program name: Druga Droga Database (DRGDB)
+// Author: LYCNK
+// Description:	This is the main database of the scroller
+
+// Rules for accessing this databse
+// target -> Str1
+// source -> Str2
+
+// Format documenting
+// MAPS:
+//	MAPS WILL HAVE NO END LINE CHARS
+
+// Story formatting
+// |LSTOR
+// each element is a specific memory to save
+// 1. Save file exists = 428
+// 2. X of tile
+// 3. Y of tile
+// 4. U of char (X)
+// 5. V of char (Y)
+//
+// 11. Seen picture of corpse already when interacting earlier
+
+// Characters.
+// 0 = blank, walkable
+// 1 = wall, solid
+// 2 = C, CORPSE
+
+0->O
+
+If Str1="TILE":Then
+	1->O
+End
+If Str1="INT":Then
+	0->Z
+	2->O
+End
+
+If O=1
+Goto AA
+If O=2
+Goto BB
+
+// LBL's
+
+Lbl AA // TILE LOADER
+
+If Y=0
+Then
+	If X=0
+	Then
+		{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}->|LTILE // Alleyway at start
+	1->Z
+	Return
+	End
+	
+	If X=1
+	Then
+		{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}->|LTILE // Alleyway intermediate
+	1->Z
+	Return
+	End
+
+	If X=2
+	Then
+		{1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}->|LTILE // Street
+	1->Z
+	Return
+	End
+End
+
+
+
+Return // If no match
+
+// /TILE LOADER
+
+// INTERACTION
+
+Lbl BB
+
+If D=2
+Then
+	"It doesn't move."->Str0
+	1->Z // How much lines are being sent
+	Return
+End
+
+// /INTERACTION
