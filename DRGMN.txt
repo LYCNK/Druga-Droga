@@ -1,0 +1,492 @@
+// Program name: Druga Droga Main (DRGMN)
+// Author: LYCNK
+// Description:	This is the main runtime of the scroller
+//				The database is DRGDB.
+
+ClrDraw
+ClrHome
+0->Xmin
+95->Xmax
+0->Ymin
+63->Ymax
+CoordOff
+AxesOff
+
+//
+//		MAIN MENU
+//
+
+Lbl MN
+
+0->O
+Menu("Druga Droga","New",NW,"Load",LD,"Quit",QT //Title, Text, label
+
+Lbl QT
+Disp "Awwk..."
+rand(100)
+Disp "Okay, fine."
+Stop // Quits
+
+Lbl NW
+DelVar |LSTOR
+428->|LSTOR(1)
+0->|LSTOR(2) // X
+0->|LSTOR(3) // Y
+6->|LSTOR(4) // U
+3->|LSTOR(5) // V
+RecallPic 0
+Pause 
+ClrDraw
+RecallPic 1
+Pause 
+Goto ST
+
+Lbl LD
+Disp "'UNDEFINED' is"
+Disp "output if no"
+Disp "save exists."
+Output(8,1,"Press ENTER"
+
+Pause 
+	
+Pause 
+If |LSTOR(1)=428
+	Then
+	ClrHome
+	Disp "Success!"
+	//
+		//Load in values here
+	//
+	Pause 
+	ClrHome
+End
+//
+//		/MAIN MENU
+//
+	
+
+Lbl ST //START
+
+// The current tile will be stored in X and Y
+// The char pos will be U and V
+// Screen size is 16/8
+
+2->X // NOT TO BE IN FINAL RELEASE
+0->Y // "
+
+// RELEASE CODE
+//|LSTOR(2)->X
+//|LSTOR(3)->Y
+// /RELEASE CODE
+|LSTOR(4)->U
+|LSTOR(5)->V
+
+"TILE"->Str1 // Set the call to Tile load
+prgmDRGDB // ProgramDB uses Return so there is no need for Return subroutine in this program
+
+// Tile Drawer
+
+0->theta
+
+Lbl TL // we jump here from interaction
+
+1->A // X // Output goes Row, Column... Y, X
+1->B // Y
+1->C // List address
+0->D // Data in list
+
+
+If theta=1:Then // "Redraw" sent from Text push. Theta is no. of lines from bottom
+	8->B
+	(7*16)+1->C
+End
+If theta=2:Then
+	7->B
+	(6*16)+1->C
+End
+If theta=3:Then
+	6->B
+	(5*16)+1->C
+End
+If theta=4:Then
+	5->B
+	(4*16)+1->C
+End
+If theta=5:Then
+	4->B
+	(3*16)+1->C
+End
+If theta=6:Then
+	3->B
+	(2*16)+1->C
+End
+If theta=7:Then
+	2->B
+	(1*16)+1->C
+End
+If theta=8:Then
+	1->B
+	1->C
+End
+
+
+While B<9
+	While A<17
+		|LTILE(C)->D
+		If theta!=0
+		Output(B,A,"                " // to help with optimisation fixes
+		
+		If D=1
+		Then
+			Output(B,A,"#"
+		Else
+			If D=2
+			Then
+				Output(B,A,"C"
+			End
+		End
+		
+		//If D=1
+		//Output(B,A,"#"
+		//If D=3
+		//Output(B,A,"K"
+		//If D=0
+		//Output(B,A," "
+		
+		A+1->A
+		C+1->C
+	End
+	1->A
+	//C+1->C
+	B+1->B
+End
+
+0->Z
+
+Output(V,U,"@" // First pos. of char.
+
+// /Tile Drawer
+
+// Char Manipulation
+
+Lbl CH
+
+// Declerations include the ones from Tile Drawer
+// Theta will be getKey
+// Redraw flag will be Z
+
+Repeat theta // Key getter
+	getKey->theta
+End
+
+0->O // Let's try adding this
+
+If theta=24:Then // Left
+	1->L // Set LastInput to 1 (Left)
+	If U!=1:Then // If not at border
+		|LTILE(((V-1)*16)+(U-1))->D // Get the Character at the place we want to go
+		If D=0:Then // If it's blank space
+			U-1->U // Move left
+			1->O // Optimisation >:3
+		End
+	Else
+		1->Z
+		5->O // Anti Mem leak
+	End
+Else
+	If theta=25:Then // Up
+		2->L
+		If V!=1:Then
+			|LTILE(((V-2)*16)+(U))->D
+			If D=0:Then
+				V-1->V
+				2->O
+			End
+		Else
+			2->Z
+			5->O
+		End
+	Else
+		If theta=26:Then // Right
+			3->L
+			If U!=16:Then
+				|LTILE(((V-1)*16)+(U+1))->D
+				If D=0:Then
+					U+1->U
+					3->O
+				End
+			Else
+				3->Z
+				5->O
+			End
+		Else
+			If theta=34:Then // Down
+				4->L
+				If V!=8:Then
+					|LTILE(((V)*16)+(U))->D
+					If D=0:Then
+						V+1->V
+						4->O
+					End
+				Else
+					4->Z
+					5->O
+				End
+			End
+		End
+	End
+End // This is from the weird way Elif statements work in TI-BASIC
+
+If O=1 // MEMORY LEAK OPTIMISATIONS :<
+Goto 1
+If O=2
+Goto 2
+If O=3
+Goto 3
+If O=4
+Goto 4
+If O=5
+Goto SW
+
+If theta=105:Then // Enter :: CHARACTER INT
+	If L=1:Then // Facing Left
+		|LTILE(((V-1)*16)+(U-1))->D
+		If (D!=0) and (D!=1):Then
+			"INT"->Str1
+			prgmDRGDB // Z is set to 0 in here
+			//If Z!=0
+			//Goto TX//Removed for mem leak
+		End
+	End
+	If L=2:Then // Facing Up
+		|LTILE(((V-2)*16)+(U))->D
+		If (D!=0) and (D!=1):Then
+			"INT"->Str1
+			prgmDRGDB
+			//If Z!=0
+			//Goto TX
+		End
+	End
+	If L=3:Then // Facing Right
+		|LTILE(((V-1)*16)+(U+1))->D
+		If (D!=0) and (D!=1):Then
+			"INT"->Str1
+			prgmDRGDB
+			//If Z!=0
+			//Goto TX
+		End
+	End
+	If L=4:Then // Facing Down
+		|LTILE(((V)*16)+(U))->D
+		If (D!=0) and (D!=1):Then
+			"INT"->Str1
+			prgmDRGDB
+			//If Z!=0
+			//Goto TX
+		End
+	End
+End // /CHARACTER INTERACTION
+// Keep these next to each other for program execution order
+Lbl TX // TEXT PUSH
+
+0->O
+
+If Z=1:Then // One line to be pushed
+	Output(8,1,Str0 // This is meant to be used mostly for narration, but all can be
+	Pause 
+	1->theta // Number of lines from bottom to redraw
+	1->O
+End
+If Z=2:Then // Two lines to be pushed
+	Output(7,1,Str0 // Str0 is the name
+	Output(8,1,Str1
+	Pause 
+	2->theta // Number of lines from bottom to redraw
+	1->O
+End
+If Z=3:Then // Three lines to be pushed
+	Output(6,1,Str0 // Str0 is the name
+	Output(7,1,Str1
+	Output(8,1,Str2
+	Pause 
+	3->theta
+	1->O
+End
+If Z=4:Then // Four lines to be pushed
+	Output(5,1,Str0 // Str0 is the name
+	Output(6,1,Str1
+	Output(7,1,Str2
+	Output(8,1,Str3
+	Pause 
+	4->theta
+	1->O
+End
+If Z=5:Then // Five lines to be pushed
+	Output(4,1,Str0 // Str0 is the name
+	Output(5,1,Str1
+	Output(6,1,Str2
+	Output(7,1,Str3
+	Output(8,1,Str4
+	Pause 
+	5->theta
+	1->O
+End
+If Z=6:Then // Six lines to be pushed
+	Output(3,1,Str0 // Str0 is the name
+	Output(4,1,Str1
+	Output(5,1,Str2
+	Output(6,1,Str3
+	Output(7,1,Str4
+	Output(8,1,Str5
+	Pause 
+	6->theta
+	1->O
+End
+If Z=7:Then // Seven lines to be pushed
+	Output(2,1,Str0 // Str0 is the name
+	Output(3,1,Str1
+	Output(4,1,Str2
+	Output(5,1,Str3
+	Output(6,1,Str4
+	Output(7,1,Str5
+	Output(8,1,Str6
+	Pause 
+	7->theta
+	1->O
+End
+If Z=8:Then // Eight lines to be pushed
+	Output(1,1,Str0 // Str0 is the name
+	Output(2,1,Str1
+	Output(3,1,Str2
+	Output(4,1,Str3
+	Output(5,1,Str4
+	Output(6,1,Str5
+	Output(7,1,Str6
+	Output(8,1,Str7
+	Pause 
+	8->theta
+	1->O
+End
+If Z=10:Then // Pic0 to be pushed
+	RecallPic 0
+	Pause 
+	0->theta
+	1->O
+End
+If Z=11:Then // Pic1 to be pushed
+	RecallPic 1
+	Pause 
+	0->theta
+	1->O
+End
+
+If O=1
+Goto TL
+
+// /TEXT PUSH
+
+Goto CH // To avoid executing Lbl 1
+
+Lbl 1
+Output(V,(U+1)," "
+Output(V,U,"@"
+Goto CH
+
+Lbl 2
+Output((V+1),U," "
+Output(V,U,"@"
+Goto CH
+
+Lbl 3
+Output(V,(U-1)," "
+Output(V,U,"@"
+Goto CH
+
+Lbl 4
+Output((V-1),U," "
+Output(V,U,"@"
+
+Goto CH
+
+// /Char Manipulation
+
+// Tile Swap
+Lbl SW
+// Set Z to 0 before requesting tile 2b loaded
+
+0->O
+
+If Z=1 // Left border
+Then
+	X-1->X
+	DelVar Z // faster than 0->Z
+	"TILE"->Str1
+	prgmDRGDB
+	// Program should return
+	If Z!=0:Then
+		16->U
+		ClrHome
+		1->O // Goto TL
+	Else
+		X+1->X
+		2->O // Goto CH
+	End
+Else
+	If Z=2 // Top border
+	Then
+		Y-1->Y // SCREEN IS TOP>BOTTOM, SO TILES WILL BE TOO
+		DelVar Z
+		"TILE"->Str1
+		prgmDRGDB
+		// Program should return
+		If Z!=0:Then
+			8->V
+			ClrHome
+			1->O
+		Else
+			Y+1->Y
+			2->O
+		End
+	Else
+		If Z=3 // Right border
+		Then
+			X+1->X
+			DelVar Z
+			"TILE"->Str1
+			prgmDRGDB
+			// Program should return
+			If Z!=0:Then
+				1->U
+				ClrHome
+				1->O
+			Else
+				X-1->X
+				2->O
+			End
+		Else
+			If Z=4 // Bottom border
+			Then
+				Y+1->Y
+				DelVar Z
+				"TILE"->Str1
+				prgmDRGDB
+				// Program should return
+				If Z!=0:Then
+					1->V
+					ClrHome
+					1->O
+				Else
+					Y-1->Y
+					2->O
+				End
+			End
+		End
+	End
+End
+
+If O=1
+Goto TL
+If O=2
+Goto CH
+
+// /Tile Swap
